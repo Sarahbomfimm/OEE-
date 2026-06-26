@@ -1,13 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
 
-// 20 time slots from 07:30 to 17:00
 const LOG_SLOTS = [
   "07:30", "08:00", "08:30", "09:00", "09:30", "10:00", "10:30", "11:00", "11:30", 
   "12:00", "12:30", "13:00", "13:30", "14:00", "14:30", "15:00", "15:30", "16:00", "16:30", "17:00"
 ];
 
-// All 21 points on X-axis (including baseline 07:00)
 const CHART_TIMES = ["07:00", ...LOG_SLOTS];
 
 const COMMON_LINENS = [
@@ -15,13 +13,12 @@ const COMMON_LINENS = [
   "Piso de Banheiro", "Edredom", "Toalha de Mesa", "Guardanapo"
 ];
 
-// Key for Local Storage
 const STORAGE_KEY = "laundry_oee_dashboard_data";
 
 function App() {
-  // --- STATES ---
+
   const [selectedDate, setSelectedDate] = useState(() => {
-    // Get local date in YYYY-MM-DD
+
     const today = new Date();
     const year = today.getFullYear();
     const month = String(today.getMonth() + 1).padStart(2, '0');
@@ -29,25 +26,21 @@ function App() {
     return `${year}-${month}-${day}`;
   });
 
-  // DB containing all dates logs: { [date]: [ { id, timeSlot, weight, linenType, isRewash } ] }
   const [db, setDb] = useState({});
   const [logs, setLogs] = useState([]);
-  
-  // Form States
+
   const [timeSlot, setTimeSlot] = useState("07:30");
   const [weight, setWeight] = useState(50);
   const [linenType, setLinenType] = useState("");
   const [isRewash, setIsRewash] = useState(false);
-  const [dailyGoal, setDailyGoal] = useState(400); // target in Kg
+  const [dailyGoal, setDailyGoal] = useState(400);
   const [editingLogId, setEditingLogId] = useState(null);
 
-  // UI Interactive States
   const [hoveredPointIndex, setHoveredPointIndex] = useState(null);
   const [printDateTime, setPrintDateTime] = useState("");
   const [highlightedRowId, setHighlightedRowId] = useState(null);
   const [theme, setTheme] = useState("light");
 
-  // --- INITIALIZATION & PERSISTENCE ---
   useEffect(() => {
     const saved = localStorage.getItem(STORAGE_KEY);
     let loadedDb = {};
@@ -60,24 +53,22 @@ function App() {
       }
     }
 
-    // Load custom goal if saved
     const savedGoal = localStorage.getItem("laundry_oee_goal");
     if (savedGoal) {
       setDailyGoal(Number(savedGoal));
     }
 
-    // Set initial mock data if completely empty
     if (!saved || Object.keys(loadedDb).length === 0) {
       const todayStr = getLocalDateString(new Date());
       const yesterdayStr = getLocalDateString(new Date(Date.now() - 86400000));
-      
+
       const mockDb = {
         [todayStr]: [
           { id: "t1", timeSlot: "07:30", weight: 50, linenType: "Lençol Solteiro", isRewash: false },
           { id: "t2", timeSlot: "08:00", weight: 50, linenType: "Fronha", isRewash: false },
           { id: "t3", timeSlot: "09:30", weight: 100, linenType: "Toalha de Banho", isRewash: false },
           { id: "t4", timeSlot: "10:00", weight: 50, linenType: "Toalha de Rosto", isRewash: false },
-          { id: "t5", timeSlot: "11:30", weight: 50, linenType: "Edredom", isRewash: true }, // one rewash
+          { id: "t5", timeSlot: "11:30", weight: 50, linenType: "Edredom", isRewash: true },
           { id: "t6", timeSlot: "12:00", weight: 50, linenType: "Lençol Casal", isRewash: false },
           { id: "t7", timeSlot: "14:00", weight: 50, linenType: "Piso de Banheiro", isRewash: false },
           { id: "t8", timeSlot: "15:00", weight: 50, linenType: "Toalha de Mesa", isRewash: false },
@@ -99,7 +90,6 @@ function App() {
     }
   }, []);
 
-  // Sync date logs
   useEffect(() => {
     if (db[selectedDate]) {
       setLogs(db[selectedDate]);
@@ -108,12 +98,10 @@ function App() {
     }
   }, [selectedDate, db]);
 
-  // Sync theme with class on body (disabled as light mode is now the only mode)
   useEffect(() => {
     document.body.className = "";
   }, []);
 
-  // Helper date conversions
   function getLocalDateString(date) {
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -127,7 +115,6 @@ function App() {
     return `${day}/${month}/${year}`;
   }
 
-  // --- ACTIONS ---
   const saveDb = (newDb) => {
     setDb(newDb);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(newDb));
@@ -141,7 +128,7 @@ function App() {
     let updatedLogs;
 
     if (editingLogId) {
-      // Edit mode
+
       updatedLogs = currentLogs.map(log => 
         log.id === editingLogId 
           ? { ...log, timeSlot, weight: Number(weight), linenType: linenType.trim() || "Diversos", isRewash }
@@ -149,7 +136,7 @@ function App() {
       );
       setEditingLogId(null);
     } else {
-      // Create mode
+
       const newLog = {
         id: 'log_' + Date.now() + Math.random().toString(36).substr(2, 4),
         timeSlot,
@@ -158,24 +145,20 @@ function App() {
         isRewash
       };
       updatedLogs = [...currentLogs, newLog];
-      
-      // Trigger new row insertion animation
+
       setHighlightedRowId(newLog.id);
       setTimeout(() => setHighlightedRowId(null), 1500);
     }
 
-    // Sort logs by time slot
     updatedLogs.sort((a, b) => LOG_SLOTS.indexOf(a.timeSlot) - LOG_SLOTS.indexOf(b.timeSlot));
 
     const newDb = { ...db, [selectedDate]: updatedLogs };
     saveDb(newDb);
 
-    // Reset Form fields except time slot (which moves to next slot for efficiency)
     setWeight(50);
     setLinenType("");
     setIsRewash(false);
-    
-    // Auto-advance time slot to the next one
+
     const currentIndex = LOG_SLOTS.indexOf(timeSlot);
     if (currentIndex < LOG_SLOTS.length - 1 && !editingLogId) {
       setTimeSlot(LOG_SLOTS[currentIndex + 1]);
@@ -188,7 +171,7 @@ function App() {
     setWeight(log.weight);
     setLinenType(log.linenType);
     setIsRewash(log.isRewash);
-    // Scroll form into view on mobile
+
     document.querySelector('.form-card-section')?.scrollIntoView({ behavior: 'smooth' });
   };
 
@@ -234,12 +217,11 @@ function App() {
   };
 
   const handlePrint = () => {
-    // Generate current printing date & time
+
     const now = new Date();
     const formatted = now.toLocaleDateString('pt-BR') + ' às ' + now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
     setPrintDateTime(formatted);
-    
-    // Allow React state to update the printable DOM before printing
+
     setTimeout(() => {
       window.print();
     }, 150);
@@ -258,38 +240,27 @@ function App() {
     localStorage.setItem("laundry_oee_goal", val.toString());
   };
 
-  // --- OEE & METRIC CALCULATIONS ---
-  // 1. Weights
   const totalWeight = logs.reduce((acc, log) => acc + log.weight, 0);
   const conformWeight = logs.reduce((acc, log) => acc + (log.isRewash ? 0 : log.weight), 0);
   const rewashWeight = totalWeight - conformWeight;
 
-  // 2. Disponibilidade (Availability): slots with action vs total 20 slots
   const activeSlotsSet = new Set(logs.map(log => log.timeSlot));
   const activeSlotsCount = activeSlotsSet.size;
   const availability = activeSlotsCount > 0 ? (activeSlotsCount / LOG_SLOTS.length) * 100 : 0;
 
-  // 3. Performance: Total weight vs Daily Goal
-  // Capped at 100% for mathematical OEE limits, but we can show actual efficiency in text
   const performance = totalWeight > 0 ? Math.min(100, (totalWeight / dailyGoal) * 100) : 0;
   const rawPerformance = totalWeight > 0 ? (totalWeight / dailyGoal) * 100 : 0;
 
-  // 4. Qualidade (Quality): conform weights vs total weights
   const quality = totalWeight > 0 ? (conformWeight / totalWeight) * 100 : 100;
 
-  // OEE Geral = (Availability * Performance * Quality)
   const oee = (availability * performance * quality) / 10000;
 
-  // Average weight per cycle
   const cycleCount = logs.length;
   const averageLoad = cycleCount > 0 ? (totalWeight / cycleCount).toFixed(1) : 0;
 
-  // --- GRAPH DATA PREPARATION ---
-  // Create an array of values for the 21 slots
   const graphPoints = [];
   let runningSum = 0;
 
-  // Initial Point (07:00 starts at 0 kg)
   graphPoints.push({
     time: "07:00",
     intervalWeight: 0,
@@ -298,15 +269,13 @@ function App() {
     hasRewash: false
   });
 
-  // Calculate cumulative step-by-step
   LOG_SLOTS.forEach((slot) => {
     const slotLogs = logs.filter(log => log.timeSlot === slot);
     const weightInSlot = slotLogs.reduce((sum, log) => sum + log.weight, 0);
     const hasRewashInSlot = slotLogs.some(log => log.isRewash);
-    
+
     runningSum += weightInSlot;
-    
-    // Combine linen list
+
     const slotLinens = slotLogs.map(log => `${log.linenType} (${log.weight}kg)${log.isRewash ? ' ⚠️' : ''}`);
 
     graphPoints.push({
@@ -318,41 +287,36 @@ function App() {
     });
   });
 
-  // SVG Chart sizing configurations
   const svgW = 1000;
   const svgH = 450;
-  const padL = 70; // left padding for Y axis
-  const padR = 40; // right padding
-  const padT = 30; // top padding
-  const padB = 50; // bottom padding for X axis
+  const padL = 70;
+  const padR = 40;
+  const padT = 30;
+  const padB = 50;
 
   const chartW = svgW - padL - padR;
   const chartH = svgH - padT - padB;
 
-  // Y Axis scale limits (ticks of 50)
   const maxCumulative = graphPoints[graphPoints.length - 1].cumulative;
-  // Default to 400 or higher if exceeded
+
   const yLimit = Math.max(400, Math.ceil(maxCumulative / 100) * 100);
   const yTicks = [];
   for (let i = 0; i <= yLimit; i += 50) {
     yTicks.push(i);
   }
 
-  // Get X coordinate for an index
   const getX = (index) => {
     return padL + (index / (CHART_TIMES.length - 1)) * chartW;
   };
 
-  // Get Y coordinate for a weight value
   const getY = (val) => {
     return padT + chartH - (val / yLimit) * chartH;
   };
 
-  // Build SVG Path for line
   let linePathD = "";
 
   if (graphPoints.length > 0) {
-    // Start point
+
     const xStart = getX(0);
     const yStart = getY(0);
     linePathD = `M ${xStart} ${yStart}`;
@@ -366,7 +330,7 @@ function App() {
 
   return (
     <div className="app-container">
-      {/* PRINT SYSTEM HEADER (HIDDEN ON SCREEN) */}
+
       <div className="print-only-info">
         <div className="print-header">
           <div>
@@ -380,7 +344,6 @@ function App() {
         </div>
       </div>
 
-      {/* DASHBOARD HEADER */}
       <header className="dashboard-header">
         <div className="brand-section">
           <div className="brand-logo">OEE</div>
@@ -391,7 +354,7 @@ function App() {
         </div>
 
         <div className="controls-area">
-          {/* Calendar Picker Navigation */}
+
           <div className="calendar-container">
             <button className="calendar-nav-btn" onClick={() => changeDateByDays(-1)} title="Dia Anterior">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="m15 18-6-6 6-6"/></svg>
@@ -407,13 +370,11 @@ function App() {
             </button>
           </div>
 
-          {/* Load Demo Data (Conditional if day empty) */}
           {logs.length === 0 && (
             <button className="btn-secondary" onClick={handleLoadDemoData} style={{ borderColor: 'rgba(245, 158, 11, 0.3)', color: '#fcd34d' }}>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg></button>
           )}
 
-          {/* Goal Input Settings */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'var(--bg-input)', border: '1px solid var(--border-subtle)', borderRadius: '10px', padding: '4px 10px' }}>
             <span style={{ fontSize: '11px', color: 'var(--text-secondary)', fontWeight: '600' }}>META:</span>
             <input 
@@ -426,9 +387,6 @@ function App() {
             <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Kg</span>
           </div>
 
-
-
-          {/* Print Button */}
           <button className="btn-primary" onClick={handlePrint} style={{ width: 'auto' }}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
             Imprimir Relatório
@@ -436,7 +394,6 @@ function App() {
         </div>
       </header>
 
-      {/* STATS OVERVIEW SECTION */}
       <section className="kpi-grid">
         <div className="glass-card kpi-card">
           <div className="kpi-icon">
@@ -493,10 +450,8 @@ function App() {
         </div>
       </section>
 
-      {/* DASHBOARD GRID */}
       <div className="dashboard-grid">
-        
-        {/* LEFT COLUMN: GRAPH */}
+
         <section className="glass-card" style={{ position: 'relative' }}>
           <div className="card-header">
             <h2>
@@ -515,8 +470,6 @@ function App() {
           <div className="chart-container-wrapper">
             <svg className="svg-chart-container" viewBox={`0 0 ${svgW} ${svgH}`}>
 
-
-              {/* GRID LINES & LABELS (Horizontal - Weights in 50Kg steps) */}
               {yTicks.map((tickVal) => {
                 const y = getY(tickVal);
                 const isGoal = tickVal === dailyGoal;
@@ -543,10 +496,9 @@ function App() {
                 );
               })}
 
-              {/* GRID LINES (Vertical - Time intervals every hour and half hour) */}
               {CHART_TIMES.map((time, idx) => {
                 const x = getX(idx);
-                // Draw major line for full hours, minor for half hours
+
                 const isFullHour = time.endsWith(":00");
                 return (
                   <g key={time}>
@@ -571,17 +523,12 @@ function App() {
                 );
               })}
 
-              {/* X & Y Axis baseline */}
               <line x1={padL} y1={svgH - padB} x2={svgW - padR} y2={svgH - padB} className="chart-axis-line" />
               <line x1={padL} y1={padT} x2={padL} y2={svgH - padB} className="chart-axis-line" />
 
-
-
-              {/* CHART LINE SHADOW & GLOW */}
               {linePathD && <path d={linePathD} className="chart-line-shadow" fill="none" />}
               {linePathD && <path d={linePathD} className="chart-line" fill="none" />}
 
-              {/* HIGHLIGHTED VERTICAL HOVER LINE */}
               {hoveredPointIndex !== null && (
                 <line
                   x1={getX(hoveredPointIndex)}
@@ -595,13 +542,11 @@ function App() {
                 />
               )}
 
-              {/* CHART STEP POINTS */}
               {graphPoints.map((pt, idx) => {
                 const x = getX(idx);
                 const y = getY(pt.cumulative);
                 const isActive = hoveredPointIndex === idx;
-                
-                // Don't show circle animation on 07:00 unless hovered
+
                 if (idx === 0) return null;
 
                 return (
@@ -628,7 +573,6 @@ function App() {
                 );
               })}
 
-              {/* CHART INTERACTIVE SENSITIVE BARS FOR EASY HOVER */}
               {graphPoints.map((pt, idx) => {
                 const x = getX(idx);
                 const halfCol = chartW / (CHART_TIMES.length - 1) / 2;
@@ -647,7 +591,6 @@ function App() {
               })}
             </svg>
 
-            {/* FLOATING DETAILED HOVER TOOLTIP */}
             {hoveredPointIndex !== null && graphPoints[hoveredPointIndex] && (
               <div 
                 className="chart-tooltip"
@@ -667,7 +610,7 @@ function App() {
                     {graphPoints[hoveredPointIndex].intervalWeight} kg
                   </span>
                 </div>
-                
+
                 {graphPoints[hoveredPointIndex].linens.length > 0 && (
                   <div style={{ marginTop: '6px', borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '6px' }}>
                     <div style={{ fontSize: '10px', color: 'var(--text-secondary)', fontWeight: 'bold', marginBottom: '2px' }}>ENXOVAL:</div>
@@ -688,10 +631,8 @@ function App() {
           </div>
         </section>
 
-        {/* RIGHT COLUMN: CONTROLS & TABLE */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-          
-          {/* REGISTRATION FORM */}
+
           <section className="glass-card form-card-section">
             <div className="card-header">
               <h2>
@@ -706,8 +647,7 @@ function App() {
             </div>
 
             <form onSubmit={handleAddOrUpdate}>
-              
-              {/* Horário */}
+
               <div className="form-group">
                 <label htmlFor="time-select">Horário do Fechamento (Intervalo de 30m)</label>
                 <select 
@@ -728,7 +668,6 @@ function App() {
                 </select>
               </div>
 
-              {/* Quantidade Kg */}
               <div className="form-group">
                 <label htmlFor="weight-input">Quantidade Lavada (Kg)</label>
                 <div className="weight-stepper">
@@ -758,7 +697,6 @@ function App() {
                 </div>
               </div>
 
-              {/* Tipo de Enxoval */}
               <div className="form-group">
                 <label htmlFor="linen-input">Tipo de Enxoval</label>
                 <input 
@@ -769,8 +707,7 @@ function App() {
                   value={linenType}
                   onChange={(e) => setLinenType(e.target.value)}
                 />
-                
-                {/* Suggestions Quick Buttons */}
+
                 <div className="suggestions-label">Sugestões rápidas:</div>
                 <div className="suggestions-container">
                   {COMMON_LINENS.map(item => (
@@ -786,7 +723,6 @@ function App() {
                 </div>
               </div>
 
-              {/* Re-wash Warning Checkbox */}
               <div className="form-group" style={{ flexDirection: 'row', alignItems: 'center', gap: '8px', marginTop: '12px' }}>
                 <input 
                   type="checkbox" 
@@ -801,7 +737,6 @@ function App() {
                 </label>
               </div>
 
-              {/* Submit Buttons */}
               <div className="action-buttons">
                 <button type="submit" className="btn-primary">
                   {editingLogId ? (
@@ -827,7 +762,6 @@ function App() {
         </div>
       </div>
 
-      {/* DATA TABLE */}
       <section className="glass-card">
         <div className="card-header">
           <h2>

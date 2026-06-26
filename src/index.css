@@ -4,7 +4,6 @@
   --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
   --font-heading: 'Outfit', var(--font-sans);
   
-  /* Palette - Premium Light Theme */
   --bg-app: #f4f6fa;
   --bg-card: #ffffff;
   --bg-card-hover: #ffffff;
@@ -59,7 +58,6 @@ body {
   border: none;
 }
 
-/* Print CSS placeholder. Specific overrides will be in App.css */
 @media print {
   body {
     background: white !important;

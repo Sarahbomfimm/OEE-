@@ -1,4 +1,4 @@
-/* Dashboard CSS styling */
+
 .app-container {
   padding: 24px;
   display: flex;
@@ -6,7 +6,6 @@
   gap: 24px;
 }
 
-/* Header section */
 .dashboard-header {
   display: flex;
   flex-direction: row;
@@ -62,7 +61,6 @@
   flex-wrap: wrap;
 }
 
-/* Base Card style */
 .glass-card {
   background: var(--gradient-card);
   backdrop-filter: blur(16px);
@@ -78,7 +76,6 @@
   border-color: rgba(6, 182, 212, 0.2);
 }
 
-/* KPI Grid */
 .kpi-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -152,7 +149,6 @@
 .kpi-trend.success { color: var(--accent-success); }
 .kpi-trend.muted { color: var(--text-muted); }
 
-/* Main Dashboard Grid Layout */
 .dashboard-grid {
   display: grid;
   grid-template-columns: 1.6fr 1fr;
@@ -166,7 +162,6 @@
   }
 }
 
-/* Card Header */
 .card-header {
   display: flex;
   justify-content: space-between;
@@ -191,7 +186,6 @@
   margin-bottom: 20px;
 }
 
-/* Chart Styles */
 .chart-container-wrapper {
   position: relative;
   width: 100%;
@@ -203,7 +197,6 @@
   overflow: visible;
 }
 
-/* Chart elements style */
 .chart-grid-line {
   stroke: var(--border-subtle);
   stroke-width: 1;
@@ -247,8 +240,6 @@
   fill: none !important;
 }
 
-
-
 .chart-point-pulse {
   fill: var(--accent-cyan);
   opacity: 0.4;
@@ -287,7 +278,6 @@
   stroke-dasharray: 4 4;
 }
 
-/* Custom Interactive Tooltip */
 .chart-tooltip {
   position: absolute;
   background: #ffffff;
@@ -331,7 +321,6 @@
   color: var(--accent-cyan);
 }
 
-/* Inputs & Form */
 .form-group {
   display: flex;
   flex-direction: column;
@@ -363,7 +352,6 @@
   box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.15);
 }
 
-/* Stepper weight selector */
 .weight-stepper {
   display: flex;
   gap: 8px;
@@ -401,7 +389,6 @@
   transform: scale(0.95);
 }
 
-/* Linen quick suggestions */
 .suggestions-label {
   font-size: 11px;
   color: var(--text-muted);
@@ -432,7 +419,6 @@
   border-color: #3b82f6;
 }
 
-/* Button style */
 .btn-primary {
   background: var(--gradient-primary);
   color: #070a13;
@@ -502,14 +488,12 @@
   color: #ffffff;
 }
 
-/* Action button icons in forms */
 .action-buttons {
   display: flex;
   gap: 8px;
   margin-top: 8px;
 }
 
-/* Table Style */
 .table-wrapper {
   overflow-x: auto;
   border-radius: var(--radius-md);
@@ -625,7 +609,6 @@
   opacity: 0.6;
 }
 
-/* Custom Calendar Input Container */
 .calendar-container {
   position: relative;
   display: flex;
@@ -673,7 +656,6 @@
   background: rgba(255, 255, 255, 0.06);
 }
 
-/* Helper Panel / Mock load alert */
 .demo-badge {
   background: rgba(245, 158, 11, 0.12);
   border: 1px solid rgba(245, 158, 11, 0.25);
@@ -687,12 +669,10 @@
   gap: 4px;
 }
 
-/* Print Only Information styling */
 .print-only-info {
   display: none;
 }
 
-/* Print-optimized layout */
 @media print {
   @page {
     margin: 1.5cm;
@@ -713,8 +693,7 @@
   .app-container {
     gap: 20px !important;
   }
-  
-  /* Hide elements not needed in print */
+
   .dashboard-header,
   .controls-area,
   .form-card-section,
@@ -773,7 +752,6 @@
     gap: 20px !important;
   }
 
-  /* Show Print Only Info */
   .print-only-info {
     display: block !important;
     margin-bottom: 20px;
@@ -801,7 +779,6 @@
     line-height: 1.4;
   }
 
-  /* Optimize SVG Chart for Print */
   .svg-chart-container {
     width: 100% !important;
     max-height: 350px !important;
@@ -829,15 +806,12 @@
     filter: none !important;
   }
 
-
-
   .chart-point {
     fill: #ffffff !important;
     stroke: #0066cc !important;
     stroke-width: 2 !important;
   }
 
-  /* Table styling for print */
   .table-wrapper {
     border: none !important;
     margin-top: 15px;
